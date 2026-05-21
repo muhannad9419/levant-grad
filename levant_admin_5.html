@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة دعوات التخرج – مدارس ليفانت</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+:root{
+  --navy:#1A3A6B;--navy2:#15305a;--navy3:#0f2449;
+  --orange:#E8A830;--orange2:#f5bf55;--gold:#c9922a;
+  --bg:#eef1f7;--white:#fff;--border:#d8dfe9;
+  --text:#1A3A6B;--muted:#6b7c96;
+  --ok:#1a7a45;--ok-bg:#d4edda;--err:#c0392b;--err-bg:#fdecea;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);direction:rtl;}
+
+/* HEADER */
+header{background:var(--navy3);color:#fff;padding:0 1.5rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(10,30,70,.35);}
+.hbrand{display:flex;align-items:center;gap:10px;}
+.hicon{width:36px;height:36px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--navy3);flex-shrink:0;}
+.ht1{font-size:15px;font-weight:700;}
+.ht2{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:1px;}
+.hstats{display:flex;gap:8px;}
+.hpill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:4px 13px;font-size:12.5px;display:flex;align-items:center;gap:5px;}
+.hpill b{color:var(--orange2);font-weight:800;}
+
+/* LAYOUT */
+.wrap{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 58px);}
+.sidebar{background:#fff;border-left:1px solid var(--border);padding:1.1rem;overflow-y:auto;}
+.slbl{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:.9rem 0 .5rem;}
+.slbl:first-child{margin-top:0;}
+.sc{background:var(--navy3);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.1rem;}
+.sc h4{font-size:12px;font-weight:700;color:var(--orange2);margin-bottom:.8rem;}
+.f{margin-bottom:.65rem;}
+.f label{display:block;font-size:11px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:3px;}
+.f input{width:100%;padding:7px 10px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(255,255,255,.08);color:#fff;font-family:'Tajawal',sans-serif;font-size:13px;}
+.f input::placeholder{color:rgba(255,255,255,.3);}
+.ita{width:100%;height:110px;padding:8px 10px;border:1.5px solid var(--border);border-radius:9px;font-family:'Tajawal',sans-serif;font-size:13px;resize:vertical;background:var(--bg);color:var(--text);}
+.ita:focus{outline:none;border-color:var(--navy3);}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border:none;border-radius:8px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;}
+.btn-full{width:100%;justify-content:center;margin-top:5px;}
+.btn-navy{background:var(--navy3);color:#fff;}.btn-navy:hover{background:var(--navy2);}
+.btn-orange{background:var(--orange);color:var(--navy3);}.btn-orange:hover{background:var(--orange2);}
+.btn-sm{padding:4px 10px;font-size:11.5px;}
+.btn-del{background:#fdecea;color:var(--err);border:1px solid #f5c6c2;}
+.btn-exp{background:#e8f0fe;color:#1a5ab8;border:1px solid #c5d5f7;}
+.btn-print{background:#e8fef0;color:var(--ok);border:1px solid #b8e8c8;}
+
+/* MAIN */
+.main{padding:1.1rem;overflow-y:auto;}
+.tabs{display:flex;gap:3px;margin-bottom:1.1rem;background:#fff;padding:4px;border-radius:10px;border:1px solid var(--border);width:fit-content;}
+.tab{padding:6px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:'Tajawal',sans-serif;transition:all .15s;}
+.tab.active{background:var(--navy3);color:#fff;}
+
+/* TABLE */
+.tcard{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+.thead2{padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.thead2 h3{font-size:14px;font-weight:700;}
+.srch{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:5px 9px;}
+.srch input{border:none;background:transparent;font-family:'Tajawal',sans-serif;font-size:13px;color:var(--text);width:150px;}
+.srch input:focus{outline:none;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bg);padding:8px 13px;font-size:11px;font-weight:800;color:var(--muted);text-align:right;border-bottom:1px solid var(--border);}
+td{padding:8px 13px;font-size:12.5px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f8fafd;}
+.badge{display:inline-flex;padding:2px 8px;border-radius:18px;font-size:10.5px;font-weight:700;}
+.b-wait{background:#fff3cd;color:#856404;}.b-ok{background:var(--ok-bg);color:var(--ok);}
+.actbtns{display:flex;gap:4px;}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;}
+.empty{text-align:center;padding:3rem 1.5rem;color:var(--muted);}
+.empty .ico{font-size:40px;margin-bottom:.6rem;}
+
+/* ═══════════════════════════
+   INVITATION CARD
+═══════════════════════════ */
+.inv{border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 3px 18px rgba(15,36,73,.1);background:#fff;transition:transform .2s,box-shadow .2s;}
+.inv:hover{transform:translateY(-2px);box-shadow:0 7px 26px rgba(15,36,73,.16);}
+
+/* Header — solid navy3 throughout */
+.inv-head{background:var(--navy3);padding:24px 18px 18px;text-align:center;}
+.inv-emblem{font-size:48px;display:block;margin-bottom:10px;line-height:1;}
+.inv-school-ar{font-size:16px;font-weight:900;color:#fff;letter-spacing:.01em;line-height:1.2;}
+.inv-school-en{font-size:9.5px;color:rgba(255,255,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-top:3px;}
+.inv-year-pill{display:inline-block;margin-top:10px;background:var(--orange);color:var(--navy3);font-size:10.5px;font-weight:800;padding:3px 16px;border-radius:12px;letter-spacing:.04em;}
+
+/* Gold bar */
+.inv-gold-bar{height:5px;background:linear-gradient(90deg,var(--gold),var(--orange),var(--orange2),var(--orange),var(--gold));}
+
+/* Event band */
+.inv-event-band{background:var(--bg);padding:11px 18px;text-align:center;border-bottom:1px solid var(--border);}
+.inv-event-title{font-size:16px;font-weight:900;color:var(--navy3);letter-spacing:.02em;}
+.inv-event-sub{font-size:11px;color:var(--muted);margin-top:2px;font-style:italic;}
+
+/* Body */
+.inv-body{padding:13px 18px 9px;}
+.inv-guest-lbl{font-size:9.5px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.07em;}
+.inv-guest-name{font-size:17px;font-weight:900;color:var(--navy3);margin:3px 0 11px;line-height:1.2;}
+.inv-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.inv-info{background:var(--bg);border-radius:8px;padding:7px 9px;border-right:3px solid var(--orange);}
+.inv-info.full{grid-column:1/-1;}
+.inv-info-lbl{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em;}
+.inv-info-val{font-size:12px;font-weight:700;color:var(--navy3);margin-top:2px;line-height:1.3;}
+
+/* Footer */
+.inv-foot{background:var(--navy3);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.inv-qr-box{width:80px;height:80px;background:#fff;border-radius:7px;padding:5px;display:flex;align-items:center;justify-content:center;border:2px solid var(--orange);}
+.inv-qr-box canvas,.inv-qr-box img{width:70px!important;height:70px!important;}
+.inv-qr-code{font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;font-family:monospace;letter-spacing:.06em;text-align:center;}
+.inv-card-lbl{font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.inv-card-num{font-size:36px;font-weight:900;color:var(--orange);line-height:1;}
+.inv-card-cat{font-size:10.5px;color:rgba(255,255,255,.6);margin-top:2px;}
+.inv-actions{display:flex;gap:6px;padding:9px 16px;border-top:1px solid var(--border);}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(15,36,73,.55);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;}
+.ov.open{opacity:1;pointer-events:all;}
+.modal{background:#fff;border-radius:16px;padding:1.6rem;width:420px;max-width:95vw;transform:scale(.95);transition:transform .2s;}
+.ov.open .modal{transform:scale(1);}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:1rem;}
+.mf{margin-bottom:.8rem;}
+.mf label{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:4px;}
+.mf input,.mf select{width:100%;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:'Tajawal',sans-serif;font-size:13.5px;color:var(--text);}
+.mf input:focus,.mf select:focus{outline:none;border-color:var(--navy3);}
+.macts{display:flex;gap:7px;justify-content:flex-end;margin-top:1.1rem;}
+.toast{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--navy3);color:#fff;padding:10px 17px;border-radius:9px;font-size:13px;font-weight:600;box-shadow:0 4px 18px rgba(10,30,70,.3);opacity:0;transform:translateY(7px);transition:all .25s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;transform:translateY(0);}
+@media print{
+  header,.sidebar,.tabs,.tcard,.inv-actions,.actbtns,.btn{display:none!important;}
+  body{background:#fff;}.wrap{display:block;}.main{padding:0;}
+  .pgrid{grid-template-columns:1fr 1fr;gap:.7cm;}
+  .inv{box-shadow:none;border:1px solid #ccc;break-inside:avoid;margin-bottom:.5cm;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hbrand">
+    <div class="hicon">🎓</div>
+    <div>
+      <div class="ht1">لوحة إدارة دعوات التخرج</div>
+      <div class="ht2">مدارس ليفانت الدولية · الثانوية العامة 2024–2025</div>
+    </div>
+  </div>
+  <div class="hstats">
+    <div class="hpill">الإجمالي: <b id="st-t">0</b></div>
+    <div class="hpill">تحقق: <b id="st-v">0</b></div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="sidebar">
+  <div class="slbl">⚙️ إعدادات الحفل</div>
+  <div class="sc">
+    <h4>تفاصيل الفعالية</h4>
+    <div class="f"><label>اسم المدرسة</label><input id="s-school" value="مدارس ليفانت الدولية" oninput="saveS()"></div>
+    <div class="f"><label>العام الدراسي</label><input id="s-year" value="2024 – 2025" oninput="saveS()"></div>
+    <div class="f"><label>تاريخ الحفل</label><input id="s-date" value="السبت، 23 مايو 2026" oninput="saveS()"></div>
+    <div class="f"><label>وقت الحفل</label><input id="s-time" value="7:00 مساءً" oninput="saveS()"></div>
+    <div class="f"><label>مكان الحفل</label><input id="s-venue" value="مطعم تل الرمان" oninput="saveS()"></div>
+  </div>
+  <div class="slbl">👥 استيراد المدعوين</div>
+  <textarea class="ita" id="gin" placeholder="الصق الأسماء هنا — كل اسم في سطر:&#10;أحمد محمد العمري — بطاقة 1&#10;أحمد محمد العمري — بطاقة 2&#10;أحمد محمد العمري — بطاقة 3"></textarea>
+  <div class="hint">💡 كل سطر = بطاقة مستقلة بـ QR فريد لا يمكن تكراره.</div>
+  <button class="btn btn-orange btn-full" onclick="importG()">➕ استيراد القائمة</button>
+  <button class="btn btn-navy btn-full" onclick="showModal()">✏️ إضافة يدوية</button>
+  <div class="slbl" style="margin-top:1rem">⚡ إجراءات</div>
+  <button class="btn btn-exp btn-full" onclick="exportVerify()">📲 تصدير ملف التحقق للبوابة</button>
+  <button class="btn btn-exp btn-full" onclick="exportCSV()">📊 تصدير القائمة CSV</button>
+  <button class="btn btn-print btn-full" onclick="printAll()">🖨️ طباعة جميع الدعوات</button>
+  <button class="btn btn-del btn-full" onclick="clearAll()">🗑️ مسح البيانات</button>
+</div>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('guests',this)">قائمة المدعوين</button>
+    <button class="tab" onclick="switchTab('preview',this)">معاينة الدعوات</button>
+  </div>
+  <div id="tab-guests">
+    <div class="tcard">
+      <div class="thead2"><h3>المدعوون (<span id="sc">0</span>)</h3><div class="srch">🔍<input type="text" id="sq" placeholder="بحث..." oninput="renderTable()"></div></div>
+      <div id="tbl"></div>
+    </div>
+  </div>
+  <div id="tab-preview" style="display:none"><div id="pgw"></div></div>
+</div>
+</div>
+
+<div class="ov" id="modal">
+  <div class="modal">
+    <h3>➕ إضافة بطاقة</h3>
+    <div class="mf"><label>الاسم الكامل</label><input type="text" id="mn" placeholder="مثال: أحمد محمد العمري — بطاقة 1"></div>
+    <div class="mf"><label>التصنيف</label><select id="mc"><option>ضيف</option><option>VIP</option><option>عائلة</option><option>هيئة تدريس</option></select></div>
+    <div class="macts">
+      <button class="btn" onclick="closeModal()" style="background:var(--bg);border:1px solid var(--border)">إلغاء</button>
+      <button class="btn btn-orange" onclick="addOne()">إضافة</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var G=JSON.parse(localStorage.getItem('lev_g')||'[]');
+var S=JSON.parse(localStorage.getItem('lev_s')||'null')||{
+  school:'مدارس ليفانت الدولية',year:'2024 – 2025',
+  date:'السبت، 23 مايو 2026',time:'7:00 مساءً',venue:'مطعم تل الرمان'
+};
+var activeTab='guests',qQ=[],qR=false;
+
+window.onload=function(){loadS();updateStats();renderTable();};
+
+function loadS(){['school','year','date','time','venue'].forEach(function(k){var el=document.getElementById('s-'+k);if(el)el.value=S[k]||'';});}
+function saveS(){S={school:v('s-school'),year:v('s-year'),date:v('s-date'),time:v('s-time'),venue:v('s-venue')};localStorage.setItem('lev_s',JSON.stringify(S));}
+function v(id){return document.getElementById(id).value;}
+function save(){localStorage.setItem('lev_g',JSON.stringify(G));updateStats();}
+function uid(){return Math.random().toString(36).substr(2,8).toUpperCase();}
+
+function importG(){
+  var raw=v('gin').trim();if(!raw){toast('⚠️ أدخل الأسماء');return;}
+  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  var added=0;
+  lines.forEach(function(name,i){G.push({id:Date.now()+i,name:name,code:uid(),cat:'ضيف',seat:G.length+1,ver:false,verAt:null});added++;});
+  document.getElementById('gin').value='';save();renderTable();
+  if(activeTab==='preview')renderPreview();
+  toast('✅ تم إضافة '+added+' بطاقة');
+}
+function showModal(){document.getElementById('modal').classList.add('open');document.getElementById('mn').focus();}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('mn').value='';}
+function addOne(){
+  var name=document.getElementById('mn').value.trim(),cat=document.getElementById('mc').value;
+  if(!name){toast('⚠️ أدخل الاسم');return;}
+  G.push({id:Date.now(),name:name,code:uid(),cat:cat,seat:G.length+1,ver:false,verAt:null});
+  save();renderTable();if(activeTab==='preview')renderPreview();closeModal();toast('✅ '+name);
+}
+function delG(id){
+  if(!confirm('حذف؟'))return;
+  G=G.filter(function(g){return g.id!==id;});G.forEach(function(g,i){g.seat=i+1;});save();renderTable();
+}
+function updateStats(){
+  document.getElementById('st-t').textContent=G.length;
+  document.getElementById('st-v').textContent=G.filter(function(g){return g.ver;}).length;
+}
+function switchTab(tab,el){
+  activeTab=tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});el.classList.add('active');
+  document.getElementById('tab-guests').style.display=tab==='guests'?'block':'none';
+  document.getElementById('tab-preview').style.display=tab==='preview'?'block':'none';
+  if(tab==='preview')renderPreview();
+}
+function renderTable(){
+  var q=v('sq').toLowerCase();
+  var fl=G.filter(function(g){return g.name.toLowerCase().indexOf(q)>-1||g.code.toLowerCase().indexOf(q)>-1;});
+  document.getElementById('sc').textContent=fl.length;
+  if(!fl.length){document.getElementById('tbl').innerHTML='<div class="empty"><div class="ico">'+(G.length?'🔍':'👥')+'</div><p>'+(G.length?'لا نتائج':'أضف المدعوين من القائمة')+'</p></div>';return;}
+  document.getElementById('tbl').innerHTML='<table><thead><tr><th>#</th><th>الاسم</th><th>كود QR</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>'+
+    fl.map(function(g){return '<tr><td style="color:var(--muted);font-weight:700">'+g.seat+'</td><td style="font-weight:600">'+g.name+'</td>'+
+      '<td><span style="font-family:monospace;font-size:11px;background:var(--bg);padding:2px 7px;border-radius:5px">'+g.code+'</span></td>'+
+      '<td><span class="badge '+(g.ver?'b-ok':'b-wait')+'">'+(g.ver?'✔ دخل':'⏳')+'</span></td>'+
+      '<td><div class="actbtns"><button class="btn btn-sm btn-del" onclick="delG('+g.id+')">🗑️</button></div></td></tr>';}).join('')+'</tbody></table>';
+}
+
+function renderPreview(){
+  if(!G.length){document.getElementById('pgw').innerHTML='<div class="empty"><div class="ico">🎟️</div><p>أضف مدعوين أولاً</p></div>';return;}
+  var grid=document.createElement('div');grid.className='pgrid';
+  G.forEach(function(g){var d=document.createElement('div');d.className='inv';d.id='inv-'+g.id;d.innerHTML=cardHTML(g);grid.appendChild(d);});
+  document.getElementById('pgw').innerHTML='';document.getElementById('pgw').appendChild(grid);
+  qQ=G.slice();qR=false;nextQR();
+}
+function nextQR(){
+  if(qR||!qQ.length)return;qR=true;
+  var g=qQ.shift();var el=document.getElementById('qrb-'+g.id);
+  if(el){try{new QRCode(el,{text:'LEVANT:'+g.code,width:70,height:70,colorDark:'#0f2449',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.H});}catch(e){}}
+  setTimeout(function(){qR=false;nextQR();},25);
+}
+function cardHTML(g){
+  return '<div class="inv-head">'+
+    '<span class="inv-emblem">🎓</span>'+
+    '<div class="inv-school-ar">'+S.school+'</div>'+
+    '<div class="inv-school-en">Levant International Schools</div>'+
+    '<span class="inv-year-pill">GRADUATION · '+S.year+'</span></div>'+
+    '<div class="inv-gold-bar"></div>'+
+    '<div class="inv-event-band">'+
+    '<div class="inv-event-title">حفل تخريج الثانوية العامة</div>'+
+    '<div class="inv-event-sub">يُشرّفنا حضور سعادتكم</div></div>'+
+    '<div class="inv-body">'+
+    '<div class="inv-guest-lbl">المدعو الكريم</div>'+
+    '<div class="inv-guest-name">'+g.name+'</div>'+
+    '<div class="inv-info-grid">'+
+    '<div class="inv-info"><div class="inv-info-lbl">📅 التاريخ</div><div class="inv-info-val">'+S.date+'</div></div>'+
+    '<div class="inv-info"><div class="inv-info-lbl">⏰ الوقت</div><div class="inv-info-val">'+S.time+'</div></div>'+
+    '<div class="inv-info full"><div class="inv-info-lbl">📍 المكان</div><div class="inv-info-val">'+S.venue+'</div></div>'+
+    '</div></div>'+
+    '<div class="inv-foot">'+
+    '<div><div class="inv-qr-box" id="qrb-'+g.id+'"></div><div class="inv-qr-code">'+g.code+'</div></div>'+
+    '<div style="color:rgba(255,255,255,.15);font-size:32px;text-align:center">✦</div>'+
+    '<div><div class="inv-card-lbl">بطاقة رقم</div><div class="inv-card-num">'+String(g.seat).padStart(2,'0')+'</div><div class="inv-card-cat">'+g.cat+'</div></div>'+
+    '</div>'+
+    '<div class="inv-actions"><button class="btn btn-sm btn-navy" onclick="window.print()">🖨️ طباعة</button></div>';
+}
+
+function exportVerify(){
+  if(!G.length){toast('⚠️ لا توجد بيانات');return;}
+  var gd=JSON.stringify(G);
+  var html='<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8">'
+    +'<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">'
+    +'<title>بوابة التحقق – ليفانت</title>'
+    +'<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"><\/script>'
+    +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap\');'
+    +':root{--navy:#0f2449;--orange:#E8A830;--bg:#f0f3f8;--ok:#1a7a45;--ok-bg:#d4edda;--err:#c0392b;--err-bg:#fdecea;--warn:#856404;--warn-bg:#fff3cd;--border:#d8dfe9;--muted:#6b7c96;}'
+    +'*{box-sizing:border-box;margin:0;padding:0;}body{font-family:\'Tajawal\',sans-serif;background:var(--bg);color:var(--navy);direction:rtl;}'
+    +'header{background:var(--navy);padding:10px 1rem;display:flex;align-items:center;justify-content:space-between;}'
+    +'.hb{display:flex;align-items:center;gap:9px;}'
+    +'.hic{width:34px;height:34px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--navy);}'
+    +'.ht{font-size:13.5px;font-weight:700;color:#fff;}.hs{font-size:9.5px;color:rgba(255,255,255,.5);}'
+    +'.live{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:4px 11px;font-size:12px;color:#fff;}'
+    +'.dot{width:7px;height:7px;border-radius:50%;background:#4caf50;animation:p 1.5s infinite;}@keyframes p{0%,100%{opacity:1;}50%{opacity:.4;}}'
+    +'.sbar{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-bottom:1px solid var(--border);}'
+    +'.si{padding:10px;text-align:center;border-left:1px solid var(--border);}.si:last-child{border-left:none;}'
+    +'.sv{font-size:22px;font-weight:900;color:var(--navy);}.sl{font-size:9px;color:var(--muted);margin-top:1px;font-weight:600;}'
+    +'.si.ok .sv{color:var(--ok);}.si.er .sv{color:var(--err);}'
+    +'.pb-w{background:#fff;padding:6px 1rem;border-bottom:1px solid var(--border);}'
+    +'.pb{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}'
+    +'.pb-f{height:100%;background:linear-gradient(90deg,var(--orange),var(--ok));border-radius:3px;transition:width .4s;}'
+    +'.pb-l{font-size:10px;color:var(--muted);text-align:center;margin-top:3px;}'
+    +'.wrap{padding:.9rem;display:flex;flex-direction:column;gap:.8rem;max-width:480px;margin:0 auto;}'
+    +'.card{background:#fff;border-radius:13px;border:1px solid var(--border);overflow:hidden;}'
+    +'.ch{padding:.7rem .9rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}'
+    +'.ch h3{font-size:13px;font-weight:700;}'
+    +'#reader{width:100%;background:#000;min-height:230px;}#reader video{width:100%!important;}'
+    +'.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;border:none;border-radius:8px;font-family:\'Tajawal\',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;}'
+    +'.btn-or{background:#E8A830;color:#0f2449;}.btn-nv{background:#0f2449;color:#fff;}.btn-st{background:#fdecea;color:#c0392b;}.btn-sm{padding:4px 10px;}'
+    +'.result{border-radius:13px;border:2px solid var(--border);padding:1rem;background:#fff;display:none;}'
+    +'.result.show{display:block;}'
+    +'.result.ok{border-color:#b8ddc8;background:linear-gradient(135deg,var(--ok-bg),#f0faf5);}'
+    +'.result.er{border-color:#f5c6c2;background:linear-gradient(135deg,var(--err-bg),#fef8f7);}'
+    +'.result.wa{border-color:#ffe08a;background:linear-gradient(135deg,var(--warn-bg),#fffef5);}'
+    +'.ri{font-size:52px;text-align:center;margin-bottom:7px;}'
+    +'.rs{font-size:20px;font-weight:900;text-align:center;}.rs.ok{color:var(--ok);}.rs.er{color:var(--err);}.rs.wa{color:var(--warn);}'
+    +'.rsb{font-size:13px;color:var(--muted);text-align:center;margin:4px 0 9px;}'
+    +'.rinfo{background:#fff;border-radius:9px;padding:.8rem;border:1px solid rgba(0,0,0,.06);}'
+    +'.rrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,.07);}.rrow:last-child{border:none;}'
+    +'.rl{font-size:11px;color:var(--muted);font-weight:700;}.rv{font-size:13px;font-weight:700;color:var(--navy);}.rv.big{font-size:18px;}'
+    +'.mrow{display:flex;gap:6px;padding:.85rem;}'
+    +'.mi{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:\'Tajawal\',sans-serif;font-size:15px;text-transform:uppercase;letter-spacing:2px;text-align:center;color:var(--navy);}'
+    +'.mi:focus{outline:none;border-color:var(--navy);}'
+    +'.ll{max-height:260px;overflow-y:auto;padding:.5rem;}'
+    +'.li{border-radius:8px;padding:8px 9px;border:1px solid var(--border);margin-bottom:4px;}'
+    +'.li.ok{background:var(--ok-bg);border-color:#b8ddc8;}.li.er{background:var(--err-bg);border-color:#f5c6c2;}.li.wa{background:var(--warn-bg);border-color:#ffe08a;}'
+    +'.ln{font-size:12.5px;font-weight:700;}.lm{font-size:10px;color:var(--muted);margin-top:1px;display:flex;justify-content:space-between;}'
+    +'.lst{font-size:10px;font-weight:700;}.lst.ok{color:var(--ok);}.lst.er{color:var(--err);}.lst.wa{color:var(--warn);}'
+    +'.el{text-align:center;padding:1.5rem;color:var(--muted);font-size:12.5px;}<\/style><\/head><body>'
+    +'<header><div class="hb"><div class="hic">🎓<\/div>'
+    +'<div><div class="ht">بوابة التحقق – حفل التخرج<\/div>'
+    +'<div class="hs">مدارس ليفانت الدولية<\/div><\/div><\/div>'
+    +'<div class="live"><div class="dot"><\/div>مباشر<\/div><\/header>'
+    +'<div class="sbar">'
+    +'<div class="si"><div class="sv" id="st-t">0<\/div><div class="sl">الإجمالي<\/div><\/div>'
+    +'<div class="si ok"><div class="sv" id="st-i">0<\/div><div class="sl">دخلوا ✔<\/div><\/div>'
+    +'<div class="si"><div class="sv" id="st-p">0<\/div><div class="sl">بانتظار<\/div><\/div>'
+    +'<div class="si er"><div class="sv" id="st-r">0<\/div><div class="sl">خاطئة<\/div><\/div><\/div>'
+    +'<div class="pb-w"><div class="pb"><div class="pb-f" id="pbar" style="width:0%"><\/div><\/div><div class="pb-l" id="pbl">0 من 0<\/div><\/div>'
+    +'<div class="wrap">'
+    +'<div class="card"><div class="ch"><h3>📷 مسح الدعوة<\/h3>'
+    +'<div style="display:flex;gap:5px">'
+    +'<button class="btn btn-or btn-sm" id="sbtn" onclick="startCam()">▶ تشغيل<\/button>'
+    +'<button class="btn btn-st btn-sm" id="stopbtn" style="display:none" onclick="stopCam()">⏹ إيقاف<\/button>'
+    +'<\/div><\/div><div id="reader"><\/div><\/div>'
+    +'<div class="result" id="result">'
+    +'<div class="ri" id="ri"><\/div><div class="rs" id="rs"><\/div><div class="rsb" id="rsb"><\/div>'
+    +'<div class="rinfo" id="rinfo" style="display:none">'
+    +'<div class="rrow"><span class="rl">الاسم<\/span><span class="rv big" id="rn"><\/span><\/div>'
+    +'<div class="rrow"><span class="rl">رقم البطاقة<\/span><span class="rv" id="rseat"><\/span><\/div>'
+    +'<div class="rrow"><span class="rl">التصنيف<\/span><span class="rv" id="rcat"><\/span><\/div>'
+    +'<div class="rrow"><span class="rl">وقت الدخول<\/span><span class="rv" id="rtime"><\/span><\/div>'
+    +'<\/div><\/div>'
+    +'<div class="card"><div class="ch"><h3>⌨️ إدخال يدوي<\/h3><\/div>'
+    +'<div class="mrow"><input class="mi" id="mc" placeholder="XXXXXXXX" maxlength="8" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key===\'Enter\')mv()">'
+    +'<button class="btn btn-nv" onclick="mv()">تحقق<\/button><\/div><\/div>'
+    +'<div class="card"><div class="ch"><h3>📋 سجل الدخول (<span id="lc">0<\/span>)<\/h3><\/div>'
+    +'<div class="ll" id="ll"><div class="el">لم يتم تسجيل أي دخول بعد<\/div><\/div><\/div>'
+    +'<\/div>'
+    +'<script>var G='+gd+',rej=0,log=[],sc=null,scanning=false,lc=\'\',lt=0;'
+    +'window.onload=function(){us();};'
+    +'function us(){var t=G.length,i=G.filter(function(g){return g.ver;}).length;'
+    +'document.getElementById(\'st-t\').textContent=t;document.getElementById(\'st-i\').textContent=i;'
+    +'document.getElementById(\'st-p\').textContent=t-i;document.getElementById(\'st-r\').textContent=rej;'
+    +'var p=t>0?Math.round(i/t*100):0;document.getElementById(\'pbar\').style.width=p+\'%\';'
+    +'document.getElementById(\'pbl\').textContent=i+\' من \'+t+\' حضروا (\'+p+\'%)\';}'
+    +'function startCam(){if(scanning)return;document.getElementById(\'sbtn\').style.display=\'none\';document.getElementById(\'stopbtn\').style.display=\'flex\';'
+    +'sc=new Html5Qrcode(\'reader\');sc.start({facingMode:\'environment\'},{fps:10,qrbox:{width:190,height:190}},function(t){var now=Date.now();if(t===lc&&now-lt<3000)return;lc=t;lt=now;var c=t;if(t.indexOf(\'LEVANT:\')===0)c=t.split(\':\')[1];verify(c.trim().toUpperCase());},function(){}).catch(function(){showR(\'er\',\'❌\',\'خطأ في الكاميرا\',\'تأكد من الإذن\');stopCam();});scanning=true;}'
+    +'function stopCam(){if(sc&&scanning)sc.stop().catch(function(){});scanning=false;document.getElementById(\'sbtn\').style.display=\'flex\';document.getElementById(\'stopbtn\').style.display=\'none\';}'
+    +'function mv(){var c=document.getElementById(\'mc\').value.trim().toUpperCase();if(!c)return;verify(c);document.getElementById(\'mc\').value=\'\';}'
+    +'function verify(code){var g=null;for(var i=0;i<G.length;i++){if(G[i].code===code){g=G[i];break;}}'
+    +'if(!g){rej++;al({type:\'er\',name:\'كود غير معروف\',code:code,msg:\'كود غير صالح\'});showR(\'er\',\'❌\',\'كود غير صالح\',\'الكود "\'+code+\'" غير موجود\');beep(false);us();return;}'
+    +'if(g.ver){al({type:\'wa\',name:g.name,code:code,msg:\'استُخدم في \'+new Date(g.verAt).toLocaleTimeString(\'ar-JO\')});showR(\'wa\',\'⚠️\',\'بطاقة مستخدمة مسبقاً\',g.name+\' — دخل مسبقاً\',g);beep(false);us();return;}'
+    +'g.ver=true;g.verAt=new Date().toISOString();al({type:\'ok\',name:g.name,code:code,msg:\'دخول مؤكد ✔\'});showR(\'ok\',\'✅\',\'أهلاً وسهلاً!\',\'تم التحقق بنجاح\',g);beep(true);us();}'
+    +'function showR(type,icon,status,sub,g){var el=document.getElementById(\'result\');el.className=\'result show \'+type;'
+    +'document.getElementById(\'ri\').textContent=icon;var rs=document.getElementById(\'rs\');rs.textContent=status;rs.className=\'rs \'+type;'
+    +'document.getElementById(\'rsb\').textContent=sub;'
+    +'if(g){document.getElementById(\'rinfo\').style.display=\'block\';document.getElementById(\'rn\').textContent=g.name;'
+    +'document.getElementById(\'rseat\').textContent=String(g.seat).padStart(2,\'0\');document.getElementById(\'rcat\').textContent=g.cat;'
+    +'document.getElementById(\'rtime\').textContent=g.verAt?new Date(g.verAt).toLocaleTimeString(\'ar-JO\'):\'—\';}else{document.getElementById(\'rinfo\').style.display=\'none\';}'
+    +'clearTimeout(window._rt);window._rt=setTimeout(function(){el.classList.remove(\'show\');},8000);}'
+    +'function al(e){e.time=new Date().toLocaleTimeString(\'ar-JO\');log.unshift(e);if(log.length>100)log=log.slice(0,100);rl();}'
+    +'function rl(){document.getElementById(\'lc\').textContent=log.length;'
+    +'if(!log.length){document.getElementById(\'ll\').innerHTML=\'<div class="el">لم يتم تسجيل أي دخول<\/div>\';return;}'
+    +'document.getElementById(\'ll\').innerHTML=log.map(function(e){return \'<div class="li \'+e.type+\'"><div class="ln">\'+e.name+\'<\/div><div class="lm"><span class="lst \'+e.type+\'">\'+e.msg+\'<\/span><span>\'+e.time+\' · \'+e.code+\'<\/span><\/div><\/div>\';}).join(\'\');}'
+    +'function beep(ok){try{var ctx=new(window.AudioContext||window.webkitAudioContext)();var o=ctx.createOscillator(),gn=ctx.createGain();'
+    +'o.connect(gn);gn.connect(ctx.destination);o.type=\'sine\';o.frequency.value=ok?880:220;'
+    +'gn.gain.setValueAtTime(.35,ctx.currentTime);gn.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+(ok?.5:.7));'
+    +'o.start(ctx.currentTime);o.stop(ctx.currentTime+(ok?.5:.7));'
+    +'if(ok){setTimeout(function(){var o2=ctx.createOscillator(),g2=ctx.createGain();o2.connect(g2);g2.connect(ctx.destination);'
+    +'o2.frequency.value=1100;g2.gain.setValueAtTime(.2,ctx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.35);'
+    +'o2.start(ctx.currentTime);o2.stop(ctx.currentTime+.35);},200);}}catch(e){}}'
+    +'<\/script><\/body><\/html>';
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+  a.download='levant_verify.html';a.click();
+  toast('✅ ملف التحقق جاهز — أرسله للبوابة عبر واتساب');
+}
+
+function exportCSV(){
+  if(!G.length){toast('⚠️ لا توجد بيانات');return;}
+  var csv='\uFEFF'+'رقم,الاسم,الكود,التصنيف,تم التحقق\n'+
+    G.map(function(g){return g.seat+',"'+g.name+'",'+g.code+','+g.cat+','+(g.ver?'نعم':'لا');}).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='قائمة_المدعوين.csv';a.click();toast('✅ تم التصدير');
+}
+function printAll(){
+  if(!G.length){toast('⚠️ لا توجد دعوات');return;}
+  document.querySelectorAll('.tab')[1].click();
+  setTimeout(function(){
+    var total=G.length,waited=0;
+    var check=setInterval(function(){waited+=300;var done=document.querySelectorAll('.inv-qr-box canvas').length;
+      if(done>=total||waited>20000){clearInterval(check);window.print();}},300);
+  },500);
+}
+function clearAll(){
+  if(!confirm('⚠️ مسح جميع البيانات؟'))return;
+  G=[];save();renderTable();document.getElementById('pgw').innerHTML='';toast('🗑️ تم المسح');
+}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},3200);}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'&&document.getElementById('modal').classList.contains('open'))addOne();
+});
+</script>
+</body>
+</html>
